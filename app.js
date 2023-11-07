@@ -1,8 +1,11 @@
+const Joi = require('joi');
 const express = require('express');
 
 const PORT = process.env.PORT | 3000;
 
 const app = new express();
+
+app.use(express.json());
 
 const courses =  [
     {
@@ -54,7 +57,21 @@ app.get('/api/courses/:id', (req, res)=>{
 // add new course
 app.post('/api/courses', (req, res)=>{
 
-    console.log(req);
+    const schema = Joi.object({
+        courseName: Joi.string().min(3).required(),
+    });
+
+    const {error, value} = schema.validate({courseName: req.body.name});
+
+    if(error) {
+        res.status(400).json(
+            {
+                "error": "inalid request",
+                "message": error.details[0].message
+            }
+        );
+        return;
+    }
 
     const course = {
         "id": courses.length + 1,
