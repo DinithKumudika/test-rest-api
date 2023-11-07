@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const express = require('express');
+const utils = require('./utils');
 
 const PORT = process.env.PORT | 3000;
 
@@ -23,52 +24,67 @@ const courses =  [
 ];
 
 app.get('/', (req, res)=>{
-    res.json({
-        "message": "welcome to test API v1"
-    });
+    res.send("welcome to test API v1");
 });
 
 // get all courses
 app.get('/api/courses', (req, res)=>{
-    res.json({
-        "courses": courses
-    });
+    res.send(courses);
 });
 
 
 // get course by id
 app.get('/api/courses/:id', (req, res)=>{
-    const course_id = req.params.id;
+    const course_id = parseInt(req.params.id);
 
-    const course = courses.find((c)=> c.id === parseInt(course_id));
+    const course = courses.find((c)=> c.id === course_id);
 
     console.log(course);
 
     if(!course) {
-        res.status(404).json({"error": "course with the given ID is not found"});
+        res.status(404).send(`course with a id ${course_id} is not found`);
+        return;
     }
 
-    res.json({
+    res.send({
         "id": course.id,
         "name": course.name
     });
 });
 
+
+// update details of a course
+app.put('/api/courses/:id', (req, res)=>{
+    const course_id = parseInt(req.params.id); 
+    const course = courses.find((c)=> c.id === course_id);
+
+    if(!course) {
+        res.status(404).send(`course with a id ${course_id} is not found`);
+        return;
+    }
+
+    const {error, value} = utils.validateCourse(req.body.name);
+
+    if(error) {
+        res.status(400).send(
+            error.details[0].message
+        );
+        return;
+    }
+
+    course.name = req.body.name;
+
+    res.send(course);
+});
+
 // add new course
 app.post('/api/courses', (req, res)=>{
 
-    const schema = Joi.object({
-        courseName: Joi.string().min(3).required(),
-    });
-
-    const {error, value} = schema.validate({courseName: req.body.name});
+    const {error, value} = utils.validateCourse(req.body.name);
 
     if(error) {
-        res.status(400).json(
-            {
-                "error": "inalid request",
-                "message": error.details[0].message
-            }
+        res.status(400).send(
+            error.details[0].message
         );
         return;
     }
@@ -80,10 +96,7 @@ app.post('/api/courses', (req, res)=>{
 
     courses.push(course);
 
-    res.json({
-        "message": `new course added with id ${course.id}`,
-        "course": course
-    });
+    res.send(course);
 });
 
 app.get('/api/posts/:year/:month', (req, res)=>{
