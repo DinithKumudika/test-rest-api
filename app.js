@@ -99,16 +99,20 @@ app.post('/api/courses', (req, res)=>{
     res.send(course);
 });
 
-app.get('/api/posts/:year/:month', (req, res)=>{
-    const year = req.params.year;
-    const month = req.params.month;
-    const query = req.query;
+// delete a course by id
+app.delete('/api/courses/:id', (req, res)=>{
+    const course_id = parseInt(req.params.id); 
+    const course = courses.find((c)=> c.id === course_id);
 
-    res.json({
-        "year": year,
-        "month": month,
-        "query-params": query
-    });
+    if(!course) {
+        res.status(404).send(`course with a id ${course_id} is not found`);
+        return;
+    }
+
+    const index = courses.indexOf(course);
+    courses.splice(index, 1);
+
+    res.send(course);
 });
 
 app.listen(PORT, ()=>{
