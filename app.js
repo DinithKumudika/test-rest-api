@@ -42,8 +42,7 @@ app.get('/api/courses/:id', (req, res)=>{
     console.log(course);
 
     if(!course) {
-        res.status(404).send(`course with a id ${course_id} is not found`);
-        return;
+        return res.status(404).send(`course with a id ${course_id} is not found`);
     }
 
     res.send({
@@ -59,17 +58,15 @@ app.put('/api/courses/:id', (req, res)=>{
     const course = courses.find((c)=> c.id === course_id);
 
     if(!course) {
-        res.status(404).send(`course with a id ${course_id} is not found`);
-        return;
+        return res.status(404).send(`course with a id ${course_id} is not found`);
     }
 
     const {error, value} = utils.validateCourse(req.body.name);
 
     if(error) {
-        res.status(400).send(
+        return res.status(400).send(
             error.details[0].message
         );
-        return;
     }
 
     course.name = req.body.name;
@@ -83,10 +80,9 @@ app.post('/api/courses', (req, res)=>{
     const {error, value} = utils.validateCourse(req.body.name);
 
     if(error) {
-        res.status(400).send(
+        return res.status(400).send(
             error.details[0].message
         );
-        return;
     }
 
     const course = {
@@ -105,8 +101,7 @@ app.delete('/api/courses/:id', (req, res)=>{
     const course = courses.find((c)=> c.id === course_id);
 
     if(!course) {
-        res.status(404).send(`course with a id ${course_id} is not found`);
-        return;
+        return res.status(404).send(`course with a id ${course_id} is not found`);
     }
 
     const index = courses.indexOf(course);
